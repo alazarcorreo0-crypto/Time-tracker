@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TimeTracker Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans min-h-screen flex justify-center p-4 selection:bg-indigo-500/30">
+
+  <div id="app" class="w-full max-w-md flex flex-col gap-5 pt-6 pb-24">
+    
+    <div class="flex items-center justify-between mb-1">
+      <div>
+        <h1 class="text-2xl font-black text-white tracking-tight">TimeTracker</h1>
+        <p class="text-xs text-zinc-500 mt-0.5">Control de horas · Nómina personal</p>
+      </div>
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/20">
+        <span class="text-white text-lg font-bold">⚡</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl flex flex-col gap-0.5 shadow-xl">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">⏱️ Horas Totales</span>
+        <span id="total-horas-txt" class="text-2xl font-black text-white mt-1">0.00h</span>
+      </div>
+      <div class="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl flex flex-col gap-0.5 shadow-xl">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-500">💵 Total Neto</span>
+        <span id="total-dinero-txt" class="text-2xl font-black text-emerald-400 mt-1">$0.00</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl flex items-center justify-between text-sm shadow-md">
+      <span class="text-zinc-400 font-medium">Pago por hora:</span>
+      <div class="flex items-center gap-1 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800">
+        <span class="text-zinc-500 font-bold">$</span>
+        <input type="number" id="tarifa-input" value="22.01" step="0.01" class="bg-transparent text-emerald-400 font-black text-right w-16 outline-none">
+        <span class="text-zinc-600 font-medium text-xs ml-1">/ hr</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/60 border border-zinc-800/80 p-5 rounded-3xl flex flex-col gap-4 shadow-xl">
+      <h2 class="text-sm font-bold text-white tracking-wide">Nuevo Registro Diario</h2>
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Fecha</label>
+        <input type="date" id="fecha-input" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white font-semibold outline-none focus:border-indigo-500 transition-colors" style="color-scheme: dark;">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">🛫 Entrada</label>
+          <div class="flex gap-1 bg-zinc-950 border border-zinc-800 rounded-xl p-1">
+            <input type="time" id="entrada-input" class="w-full bg-transparent p-2 text-center text-sm font-bold text-white outline-none" style="color-scheme: dark;">
+            <button type="button" id="btn-now-entrada" class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-bold px-2.5 rounded-lg active:scale-90 transition-transform text-xs">▶️</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">🛬 Salida</label>
+          <div class="flex gap-1 bg-zinc-950 border border-zinc-800 rounded-xl p-1">
+            <input type="time" id="salida-input" class="w-full bg-transparent p-2 text-center text-sm font-bold text-white outline-none" style="color-scheme: dark;">
+            <button type="button" id="btn-now-salida" class="bg-rose-600/20 border border-rose-500/30 text-rose-400 font-bold px-2.5 rounded-lg active:scale-90 transition-transform text-xs">⏹️</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">☕ Descanso / Break</label>
+        <div class="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5">
+          <input type="number" id="descanso-input" value="30" min="0" class="flex-1 bg-transparent text-sm font-bold text-white outline-none">
+          <span class="text-zinc-600 text-xs font-semibold">minutos</span>
+        </div>
+      </div>
+
+      <button type="button" id="btn-guardar" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-950 transition-all active:scale-[0.97] mt-1 flex items-center justify-center gap-2">
+        📥 Guardar Turno en Historial
+      </button>
+    </div>
+
+    <div class="flex flex-col gap-2.5">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400">📅 Historial de Días</h2>
+        <button type="button" id="btn-clear-all" class="text-[11px] font-medium text-rose-400 hover:text-rose-300 transition-colors">🗑️ Limpiar todo</button>
+      </div>
+      
+      <div id="historial-lista" class="flex flex-col gap-2"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const tarifaInput = document.getElementById('tarifa-input');
+    const fechaInput = document.getElementById('fecha-input');
+    const entradaInput = document.getElementById('entrada-input');
+    const salidaInput = document.getElementById('salida-input');
+    const descansoInput = document.getElementById('descanso-input');
+    const btnGuardar = document.getElementById('btn-guardar');
+    const btnClearAll = document.getElementById('btn-clear-all');
+    const historialLista = document.getElementById('historial-lista');
+    
+    const totalHorasTxt = document.getElementById('total-horas-txt');
+    const totalDineroTxt = document.getElementById('total-dinero-txt');
+
+    fechaInput.value = new Date().toISOString().slice(0, 10);
+
+    let historial = JSON.parse(localStorage.getItem('tt_data') || '[]');
+    let tarifa = parseFloat(localStorage.getItem('tt_tarifa') || '22.01');
+    tarifaInput.value = tarifa;
+
+    // Recuperar también las últimas horas ingresadas para que no se borren al recargar la app
+    entradaInput.value = localStorage.getItem('tt_last_entrada') || '';
+    salidaInput.value = localStorage.getItem('tt_last_salida') || '';
+
+    const getHM = () => {
+      const d = new Date();
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    };
+
+    // Guardar estado en tiempo real cuando el usuario use los botones rápidos o escriba
+    const saveCurrentInputs = () => {
+      localStorage.setItem('tt_last_entrada', entradaInput.value);
+      localStorage.setItem('tt_last_salida', salidaInput.value);
+    };
+
+    document.getElementById('btn-now-entrada').onclick = () => { entradaInput.value = getHM(); saveCurrentInputs(); };
+    document.getElementById('btn-now-salida').onclick = () => { salidaInput.value = getHM(); saveCurrentInputs(); };
+    entradaInput.onchange = saveCurrentInputs;
+    salidaInput.onchange = saveCurrentInputs;
+
+    const renderApp = () => {
+      localStorage.setItem('tt_data', JSON.stringify(historial));
+      localStorage.setItem('tt_tarifa', tarifa.toString());
+
+      historialLista.innerHTML = '';
+      let globalHoras = 0;
+
+      if (historial.length === 0) {
+        historialLista.innerHTML = `<div class="bg-zinc-900/30 border border-dashed border-zinc-800/60 rounded-2xl p-6 text-center text-xs text-zinc-600 font-medium">No hay registros guardados esta semana.</div>`;
+      } else {
+        historial.forEach((item, index) => {
+          const [eH, eM] = item.entrada.split(':').map(Number);
+          let [sH, sM] = item.salida.split(':').map(Number);
+          
+          let diffMin = (sH * 60 + sM) - (eH * 60 + eM);
+          if (diffMin <= 0) diffMin += 24 * 60; 
+          
+          const horasNetas = Math.max(0, (diffMin - item.descanso) / 60);
+          globalHoras += horasNetas;
+          const pagoDia = horasNetas * tarifa;
+
+          const [y, m, d] = item.fecha.split('-');
+          const dateObj = new Date(y, m - 1, d);
+          const fechaFormato = dateObj.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+
+          historialLista.innerHTML += `
+            <div class="bg-zinc-900/50 border border-zinc-800/80 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden shadow-sm">
+              <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+              <div class="pl-2">
+                <span class="text-xs font-black text-white capitalize">${fechaFormato}</span>
+                <div class="flex gap-2.5 text-[10px] text-zinc-500 mt-0.5 font-bold">
+                  <span>In: <strong class="text-zinc-300">${item.entrada}</strong></span>
+                  <span>Out: <strong class="text-zinc-300">${item.salida}</strong></span>
+                  <span>Break: <strong class="text-zinc-400">${item.descanso}m</strong></span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="text-right">
+                  <span class="text-sm font-black text-emerald-400 block">$${pagoDia.toFixed(2)}</span>
+                  <span class="text-[10px] text-zinc-500 font-bold block">${horasNetas.toFixed(2)} hrs</span>
+                </div>
+                <button onclick="eliminarDia(${index})" class="text-zinc-600 hover:text-rose-400 text-xs active:scale-90 transition-transform px-1 font-bold">✕</button>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      totalHorasTxt.innerText = `${globalHoras.toFixed(2)}h`;
+      totalDineroTxt.innerText = `$${(globalHoras * tarifa).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
+    tarifaInput.oninput = (e) => {
+      tarifa = parseFloat(e.target.value) || 0;
+      renderApp();
+    };
+
+    btnGuardar.onclick = () => {
+      if (!entradaInput.value || !salidaInput.value) {
+        alert('Pon la hora de Entrada y Salida, porfa.');
+        return;
+      }
+
+      const nuevoTurno = {
+        id: Date.now(),
+        fecha: fechaInput.value,
+        entrada: entradaInput.value,
+        salida: salidaInput.value,
+        descanso: parseInt(descansoInput.value) || 0
+      };
+
+      historial.unshift(nuevoTurno);
+      
+      const originalText = btnGuardar.innerText;
+      btnGuardar.innerText = '✅ ¡Guardado en Historial!';
+      btnGuardar.style.opacity = '0.7';
+      setTimeout(() => {
+        btnGuardar.innerText = originalText;
+        btnGuardar.style.opacity = '1';
+      }, 1200);
+
+      // SE ELIMINÓ LA LIMPIEZA AUTOMÁTICA DE INPUTS AQUÍ.
+      // Tus horas se quedan grabadas arriba pase lo que pase.
+
+      renderApp();
+    };
+
+    window.eliminarDia = (index) => {
+      if (confirm('¿Quieres eliminar este registro del historial?')) {
+        historial.splice(index, 1);
+        renderApp();
+      }
+    };
+
+    btnClearAll.onclick = () => {
+      if (confirm('¿De verdad quieres borrar todo tu historial?')) {
+        historial = [];
+        localStorage.removeItem('tt_last_entrada');
+        localStorage.removeItem('tt_last_salida');
+        entradaInput.value = '';
+        salidaInput.value = '';
+        renderApp();
+      }
+    };
+
+    renderApp();
+  </script>
+</body>
+</html>
