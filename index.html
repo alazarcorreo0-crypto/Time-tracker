@@ -15,9 +15,45 @@
         <h1 class="text-2xl font-black text-white tracking-tight">TimeTracker</h1>
         <p class="text-xs text-zinc-500 mt-0.5">Control de horas · Nómina personal</p>
       </div>
-      <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/20">
-        <span class="text-white text-lg font-bold">⚡</span>
+      <div class="flex gap-2">
+        <button type="button" id="btn-config" class="w-10 h-10 rounded-2xl flex items-center justify-center bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold active:scale-90 transition-transform text-lg shadow-md">
+          ⚙️
+        </button>
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-lg shadow-indigo-500/20">
+          <span class="text-white text-lg font-bold">⚡</span>
+        </div>
       </div>
+    </div>
+
+    <div id="panel-config" class="hidden bg-zinc-900/90 border border-indigo-500/40 p-5 rounded-3xl flex flex-col gap-4 shadow-2xl transition-all">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+        <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400">⚙️ Configuración de Retenciones</h3>
+        <button type="button" id="btn-cerrar-config" class="text-zinc-500 hover:text-white font-bold text-xs">✕ Cerrar</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">% Impuestos (OR/Fed)</label>
+          <div class="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2">
+            <input type="number" id="tax-porcentaje-input" value="12.0" step="0.1" class="w-full bg-transparent text-sm font-black text-amber-400 outline-none text-right pr-1">
+            <span class="text-zinc-500 text-xs font-bold">%</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Deducción Fija ($)</label>
+          <div class="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl px-2 py-2">
+            <span class="text-zinc-500 text-xs font-bold pl-1">$</span>
+            <input type="number" id="deduc-fija-input" value="0.00" step="0.01" class="w-full bg-transparent text-sm font-black text-rose-400 outline-none text-right">
+          </div>
+        </div>
+      </div>
+      <p class="text-[10px] text-zinc-500 font-medium italic">El porcentaje estimado para Oregon suele rondar el 12% - 15% según tus ingresos retenidos.</p>
+    </div>
+
+    <div class="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl flex flex-col gap-2 shadow-xl">
+      <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Visualizando período:</label>
+      <select id="semana-selector" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-xs text-white font-bold outline-none focus:border-indigo-500 transition-colors" style="color-scheme: dark;">
+        <option value="actual">Semana Actual (En Curso)</option>
+      </select>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
@@ -26,8 +62,23 @@
         <span id="total-horas-txt" class="text-2xl font-black text-white mt-1">0.00h</span>
       </div>
       <div class="bg-zinc-900/60 border border-zinc-800/80 p-4 rounded-2xl flex flex-col gap-0.5 shadow-xl">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-500">💵 Total Neto</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-500">💵 Total Neto Est.</span>
         <span id="total-dinero-txt" class="text-2xl font-black text-emerald-400 mt-1">$0.00</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/40 border border-zinc-800/60 px-4 py-3 rounded-2xl flex flex-col gap-1.5 text-xs">
+      <div class="flex justify-between text-zinc-400">
+        <span>Monto Bruto:</span>
+        <span id="desglose-bruto" class="font-bold text-zinc-200">$0.00</span>
+      </div>
+      <div class="flex justify-between text-zinc-500">
+        <span>Retención Impuestos (<span id="desglose-tax-pct">12</span>%):</span>
+        <span id="desglose-impuestos" class="font-bold text-amber-500/90">-$0.00</span>
+      </div>
+      <div id="desglose-fijo-row" class="flex justify-between text-zinc-500 hidden">
+        <span>Deducciones Fijas:</span>
+        <span id="desglose-fijo" class="font-bold text-rose-500/90">-$0.00</span>
       </div>
     </div>
 
@@ -35,12 +86,12 @@
       <span class="text-zinc-400 font-medium">Pago por hora:</span>
       <div class="flex items-center gap-1 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800">
         <span class="text-zinc-500 font-bold">$</span>
-        <input type="number" id="tarifa-input" value="22.01" step="0.01" class="bg-transparent text-emerald-400 font-black text-right w-16 outline-none">
+        <input type="number" id="tarifa-input" value="0.00" step="0.01" class="bg-transparent text-emerald-400 font-black text-right w-16 outline-none">
         <span class="text-zinc-600 font-medium text-xs ml-1">/ hr</span>
       </div>
     </div>
 
-    <div class="bg-zinc-900/60 border border-zinc-800/80 p-5 rounded-3xl flex flex-col gap-4 shadow-xl">
+    <div id="contenedor-registro" class="bg-zinc-900/60 border border-zinc-800/80 p-5 rounded-3xl flex flex-col gap-4 shadow-xl">
       <h2 class="text-sm font-bold text-white tracking-wide">Nuevo Registro Diario</h2>
 
       <div>
@@ -80,8 +131,11 @@
 
     <div class="flex flex-col gap-2.5">
       <div class="flex items-center justify-between px-1">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400">📅 Historial de Días</h2>
-        <button type="button" id="btn-clear-all" class="text-[11px] font-medium text-rose-400 hover:text-rose-300 transition-colors">🗑️ Limpiar todo</button>
+        <h2 id="titulo-historial" class="text-xs font-bold uppercase tracking-wider text-zinc-400">📅 Historial de Días</h2>
+        <div class="flex gap-3">
+          <button type="button" id="btn-cerrar-semana" class="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">📦 Archivar Semana</button>
+          <button type="button" id="btn-clear-all" class="text-[11px] font-medium text-rose-400 hover:text-rose-300 transition-colors">🗑️ Limpiar todo</button>
+        </div>
       </div>
       
       <div id="historial-lista" class="flex flex-col gap-2"></div>
@@ -90,6 +144,7 @@
   </div>
 
   <script>
+    // Referencias DOM
     const tarifaInput = document.getElementById('tarifa-input');
     const fechaInput = document.getElementById('fecha-input');
     const entradaInput = document.getElementById('entrada-input');
@@ -97,27 +152,63 @@
     const descansoInput = document.getElementById('descanso-input');
     const btnGuardar = document.getElementById('btn-guardar');
     const btnClearAll = document.getElementById('btn-clear-all');
+    const btnCerrarSemana = document.getElementById('btn-cerrar-semana');
     const historialLista = document.getElementById('historial-lista');
+    const semanaSelector = document.getElementById('semana-selector');
+    const contenedorRegistro = document.getElementById('contenedor-registro');
+    const tituloHistorial = document.getElementById('titulo-historial');
     
+    // Elementos de Configuración de Impuestos
+    const btnConfig = document.getElementById('btn-config');
+    const btnCerrarConfig = document.getElementById('btn-cerrar-config');
+    const panelConfig = document.getElementById('panel-config');
+    const taxPorcentajeInput = document.getElementById('tax-porcentaje-input');
+    const deducFijaInput = document.getElementById('deduc-fija-input');
+    
+    // Displays de Totales
     const totalHorasTxt = document.getElementById('total-horas-txt');
     const totalDineroTxt = document.getElementById('total-dinero-txt');
+    const desgloseBruto = document.getElementById('desglose-bruto');
+    const desgloseImpuestos = document.getElementById('desglose-impuestos');
+    const desgloseTaxPct = document.getElementById('desglose-tax-pct');
+    const desgloseFijoRow = document.getElementById('desglose-fijo-row');
+    const desgloseFijo = document.getElementById('desglose-fijo');
 
-    fechaInput.value = new Date().toISOString().slice(0, 10);
+    // Inicializar fecha local correcta del móvil
+    const obtenerFechaLocalCliente = () => {
+      const d = new Date();
+      const año = d.getFullYear();
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const dia = String(d.getDate()).padStart(2, '0');
+      return `${año}-${mes}-${dia}`;
+    };
+    fechaInput.value = obtenerFechaLocalCliente();
 
+    // Carga de bases de datos persistentes del LocalStorage
     let historial = JSON.parse(localStorage.getItem('tt_data') || '[]');
-    let tarifa = parseFloat(localStorage.getItem('tt_tarifa') || '22.01');
-    tarifaInput.value = tarifa;
+    let semanasArchivadas = JSON.parse(localStorage.getItem('tt_semanas') || '[]');
+    let tarifa = parseFloat(localStorage.getItem('tt_tarifa') || '0.00');
+    
+    // Carga de valores tributarios nuevos sin alterar lo anterior
+    let taxPorcentaje = parseFloat(localStorage.getItem('tt_tax_pct') || '12.0');
+    let deducFija = parseFloat(localStorage.getItem('tt_deduc_fija') || '0.00');
 
-    // Recuperar también las últimas horas ingresadas para que no se borren al recargar la app
+    tarifaInput.value = tarifa;
+    taxPorcentajeInput.value = taxPorcentaje;
+    deducFijaInput.value = deducFija;
+
     entradaInput.value = localStorage.getItem('tt_last_entrada') || '';
     salidaInput.value = localStorage.getItem('tt_last_salida') || '';
+
+    // Lógica del panel de control de visualización
+    btnConfig.onclick = () => panelConfig.classList.toggle('hidden');
+    btnCerrarConfig.onclick = () => panelConfig.classList.add('hidden');
 
     const getHM = () => {
       const d = new Date();
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     };
 
-    // Guardar estado en tiempo real cuando el usuario use los botones rápidos o escriba
     const saveCurrentInputs = () => {
       localStorage.setItem('tt_last_entrada', entradaInput.value);
       localStorage.setItem('tt_last_salida', salidaInput.value);
@@ -128,17 +219,48 @@
     entradaInput.onchange = saveCurrentInputs;
     salidaInput.onchange = saveCurrentInputs;
 
+    const actualizarSelectorSemanas = () => {
+      semanaSelector.innerHTML = '<option value="actual">Semana Actual (En Curso)</option>';
+      semanasArchivadas.forEach((sem) => {
+        const option = document.createElement('option');
+        option.value = sem.id;
+        option.innerText = `Semana: ${sem.rango} (${sem.totalHoras}h)`;
+        semanaSelector.appendChild(option);
+      });
+    };
+
+    // Renderizado principal del sistema
     const renderApp = () => {
+      const vista = semanaSelector.value;
+      
+      // Guardado en tiempo real
       localStorage.setItem('tt_data', JSON.stringify(historial));
+      localStorage.setItem('tt_semanas', JSON.stringify(semanasArchivadas));
       localStorage.setItem('tt_tarifa', tarifa.toString());
+      localStorage.setItem('tt_tax_pct', taxPorcentaje.toString());
+      localStorage.setItem('tt_deduc_fija', deducFija.toString());
 
       historialLista.innerHTML = '';
       let globalHoras = 0;
+      let datosAMostrar = [];
 
-      if (historial.length === 0) {
-        historialLista.innerHTML = `<div class="bg-zinc-900/30 border border-dashed border-zinc-800/60 rounded-2xl p-6 text-center text-xs text-zinc-600 font-medium">No hay registros guardados esta semana.</div>`;
+      if (vista === 'actual') {
+        datosAMostrar = historial;
+        contenedorRegistro.style.display = 'flex';
+        btnCerrarSemana.style.display = 'inline-block';
+        tituloHistorial.innerText = "📅 Historial de Días";
       } else {
-        historial.forEach((item, index) => {
+        const semSeleccionada = semanasArchivadas.find(s => s.id == vista);
+        datosAMostrar = semSeleccionada ? semSeleccionada.datos : [];
+        contenedorRegistro.style.display = 'none';
+        btnCerrarSemana.style.display = 'none';
+        tituloHistorial.innerText = "📦 Archivo Histórico";
+      }
+
+      if (datosAMostrar.length === 0) {
+        historialLista.innerHTML = `<div class="bg-zinc-900/30 border border-dashed border-zinc-800/60 rounded-2xl p-6 text-center text-xs text-zinc-600 font-medium">No hay registros guardados en este período.</div>`;
+      } else {
+        datosAMostrar.forEach((item, index) => {
           const [eH, eM] = item.entrada.split(':').map(Number);
           let [sH, sM] = item.salida.split(':').map(Number);
           
@@ -147,11 +269,11 @@
           
           const horasNetas = Math.max(0, (diffMin - item.descanso) / 60);
           globalHoras += horasNetas;
-          const pagoDia = horasNetas * tarifa;
 
           const [y, m, d] = item.fecha.split('-');
           const dateObj = new Date(y, m - 1, d);
           const fechaFormato = dateObj.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+          const pagoDiaBruto = horasNetas * tarifa;
 
           historialLista.innerHTML += `
             <div class="bg-zinc-900/50 border border-zinc-800/80 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden shadow-sm">
@@ -166,22 +288,57 @@
               </div>
               <div class="flex items-center gap-3">
                 <div class="text-right">
-                  <span class="text-sm font-black text-emerald-400 block">$${pagoDia.toFixed(2)}</span>
+                  <span class="text-sm font-black text-zinc-300 block">$${pagoDiaBruto.toFixed(2)} <span class="text-[9px] text-zinc-600 font-normal">bruto</span></span>
                   <span class="text-[10px] text-zinc-500 font-bold block">${horasNetas.toFixed(2)} hrs</span>
                 </div>
-                <button onclick="eliminarDia(${index})" class="text-zinc-600 hover:text-rose-400 text-xs active:scale-90 transition-transform px-1 font-bold">✕</button>
+                ${vista === 'actual' ? `<button onclick="eliminarDia(${index})" class="text-zinc-600 hover:text-rose-400 text-xs active:scale-90 transition-transform px-1 font-bold">✕</button>` : ''}
               </div>
             </div>
           `;
         });
       }
 
+      // LÓGICA DE NÓMINA MATEMÁTICA CON IMPUESTOS
+      const sueldoBrutoTotal = globalHoras * tarifa;
+      const retencionImpuestosTotal = sueldoBrutoTotal * (taxPorcentaje / 100);
+      
+      // La deducción fija solo se aplica si hay horas laboradas en el tramo
+      const deduccionFijaAplicada = sueldoBrutoTotal > 0 ? deducFija : 0;
+      const sueldoNetoTotal = Math.max(0, sueldoBrutoTotal - retencionImpuestosTotal - deduccionFijaAplicada);
+
+      // Renderizados numéricos en pantalla
       totalHorasTxt.innerText = `${globalHoras.toFixed(2)}h`;
-      totalDineroTxt.innerText = `$${(globalHoras * tarifa).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      totalDineroTxt.innerText = `$${sueldoNetoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      
+      desgloseBruto.innerText = `$${sueldoBrutoTotal.toFixed(2)}`;
+      desgloseImpuestos.innerText = `-$${retencionImpuestosTotal.toFixed(2)}`;
+      desgloseTaxPct.innerText = taxPorcentaje;
+
+      if (deduccionFijaAplicada > 0) {
+        desgloseFijoRow.classList.remove('hidden');
+        desgloseFijo.innerText = `-$${deduccionFijaAplicada.toFixed(2)}`;
+      } else {
+        desgloseFijoRow.classList.add('hidden');
+      }
     };
 
+    // Escuchadores de entradas de configuración
     tarifaInput.oninput = (e) => {
       tarifa = parseFloat(e.target.value) || 0;
+      renderApp();
+    };
+
+    taxPorcentajeInput.oninput = (e) => {
+      taxPorcentaje = parseFloat(e.target.value) || 0;
+      renderApp();
+    };
+
+    deducFijaInput.oninput = (e) => {
+      deducFija = parseFloat(e.target.value) || 0;
+      renderApp();
+    };
+
+    semanaSelector.onchange = () => {
       renderApp();
     };
 
@@ -209,10 +366,53 @@
         btnGuardar.style.opacity = '1';
       }, 1200);
 
-      // SE ELIMINÓ LA LIMPIEZA AUTOMÁTICA DE INPUTS AQUÍ.
-      // Tus horas se quedan grabadas arriba pase lo que pase.
-
       renderApp();
+    };
+
+    btnCerrarSemana.onclick = () => {
+      if (historial.length === 0) {
+        alert('No tienes ningún turno registrado en la semana actual para archivar.');
+        return;
+      }
+
+      if (confirm('¿Quieres cerrar la semana actual y archivarla? Esto limpiará la pantalla principal para tu nueva semana laboral.')) {
+        const fechas = historial.map(h => h.fecha).sort();
+        const formatearF = (fStr) => {
+          const [y, m, d] = fStr.split('-');
+          return new Date(y, m - 1, d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+        };
+        const rangoTexto = `${formatearF(fechas[0])} - ${formatearF(fechas[fechas.length - 1])}`;
+
+        let totalH = 0;
+        historial.forEach(item => {
+          const [eH, eM] = item.entrada.split(':').map(Number);
+          let [sH, sM] = item.salida.split(':').map(Number);
+          let diffMin = (sH * 60 + sM) - (eH * 60 + eM);
+          if (diffMin <= 0) diffMin += 24 * 60;
+          totalH += Math.max(0, (diffMin - item.descanso) / 60);
+        });
+
+        const nuevaSemana = {
+          id: Date.now(),
+          rango: rangoTexto,
+          totalHoras: totalH.toFixed(2),
+          datos: [...historial]
+        };
+
+        semanasArchivadas.unshift(nuevaSemana);
+        historial = [];
+
+        localStorage.removeItem('tt_last_entrada');
+        localStorage.removeItem('tt_last_salida');
+        entradaInput.value = '';
+        salidaInput.value = '';
+        fechaInput.value = obtenerFechaLocalCliente();
+
+        actualizarSelectorSemanas();
+        semanaSelector.value = "actual";
+        renderApp();
+        alert('📦 Semana guardada con éxito en el selector superior.');
+      }
     };
 
     window.eliminarDia = (index) => {
@@ -223,16 +423,27 @@
     };
 
     btnClearAll.onclick = () => {
-      if (confirm('¿De verdad quieres borrar todo tu historial?')) {
-        historial = [];
-        localStorage.removeItem('tt_last_entrada');
-        localStorage.removeItem('tt_last_salida');
-        entradaInput.value = '';
-        salidaInput.value = '';
-        renderApp();
+      const vista = semanaSelector.value;
+      if (vista === 'actual') {
+        if (confirm('¿De verdad quieres borrar TODO el historial en curso de esta semana?')) {
+          historial = [];
+          localStorage.removeItem('tt_last_entrada');
+          localStorage.removeItem('tt_last_salida');
+          entradaInput.value = '';
+          salidaInput.value = '';
+          renderApp();
+        }
+      } else {
+        if (confirm('¿Quieres borrar definitivamente esta SEMANA ARCHIVADA del almacenamiento?')) {
+          semanasArchivadas = semanasArchivadas.filter(s => s.id != vista);
+          actualizarSelectorSemanas();
+          semanaSelector.value = "actual";
+          renderApp();
+        }
       }
     };
 
+    actualizarSelectorSemanas();
     renderApp();
   </script>
 </body>
