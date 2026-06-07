@@ -144,7 +144,6 @@
   </div>
 
   <script>
-    // Referencias DOM
     const tarifaInput = document.getElementById('tarifa-input');
     const fechaInput = document.getElementById('fecha-input');
     const entradaInput = document.getElementById('entrada-input');
@@ -158,14 +157,12 @@
     const contenedorRegistro = document.getElementById('contenedor-registro');
     const tituloHistorial = document.getElementById('titulo-historial');
     
-    // Elementos de Configuración de Impuestos
     const btnConfig = document.getElementById('btn-config');
     const btnCerrarConfig = document.getElementById('btn-cerrar-config');
     const panelConfig = document.getElementById('panel-config');
     const taxPorcentajeInput = document.getElementById('tax-porcentaje-input');
     const deducFijaInput = document.getElementById('deduc-fija-input');
     
-    // Displays de Totales
     const totalHorasTxt = document.getElementById('total-horas-txt');
     const totalDineroTxt = document.getElementById('total-dinero-txt');
     const desgloseBruto = document.getElementById('desglose-bruto');
@@ -174,22 +171,15 @@
     const desgloseFijoRow = document.getElementById('desglose-fijo-row');
     const desgloseFijo = document.getElementById('desglose-fijo');
 
-    // Inicializar fecha local correcta del móvil
     const obtenerFechaLocalCliente = () => {
       const d = new Date();
-      const año = d.getFullYear();
-      const mes = String(d.getMonth() + 1).padStart(2, '0');
-      const dia = String(d.getDate()).padStart(2, '0');
-      return `${año}-${mes}-${dia}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     };
     fechaInput.value = obtenerFechaLocalCliente();
 
-    // Carga de bases de datos persistentes del LocalStorage
     let historial = JSON.parse(localStorage.getItem('tt_data') || '[]');
     let semanasArchivadas = JSON.parse(localStorage.getItem('tt_semanas') || '[]');
     let tarifa = parseFloat(localStorage.getItem('tt_tarifa') || '0.00');
-    
-    // Carga de valores tributarios nuevos sin alterar lo anterior
     let taxPorcentaje = parseFloat(localStorage.getItem('tt_tax_pct') || '12.0');
     let deducFija = parseFloat(localStorage.getItem('tt_deduc_fija') || '0.00');
 
@@ -200,7 +190,6 @@
     entradaInput.value = localStorage.getItem('tt_last_entrada') || '';
     salidaInput.value = localStorage.getItem('tt_last_salida') || '';
 
-    // Lógica del panel de control de visualización
     btnConfig.onclick = () => panelConfig.classList.toggle('hidden');
     btnCerrarConfig.onclick = () => panelConfig.classList.add('hidden');
 
@@ -229,11 +218,34 @@
       });
     };
 
-    // Renderizado principal del sistema
+    // Función auxiliar para recalcular el rango de fechas y horas totales de una semana archivada tras borrar/editar
+    const recalcularTotalesSemanaArchivada = (sem) => {
+      if (sem.datos.length === 0) {
+        sem.rango = "Vacía";
+        sem.totalHoras = "0.00";
+        return;
+      }
+      const fechas = sem.datos.map(h => h.fecha).sort();
+      const formatearF = (fStr) => {
+        const [y, m, d] = fStr.split('-');
+        return new Date(y, m - 1, d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+      };
+      sem.rango = `${formatearF(fechas[0])} - ${formatearF(fechas[fechas.length - 1])}`;
+
+      let totalH = 0;
+      sem.datos.forEach(item => {
+        const [eH, eM] = item.entrada.split(':').map(Number);
+        let [sH, sM] = item.salida.split(':').map(Number);
+        let diffMin = (sH * 60 + sM) - (eH * 60 + eM);
+        if (diffMin <= 0) diffMin += 24 * 60;
+        totalH += Math.max(0, (diffMin - item.descanso) / 60);
+      });
+      sem.totalHoras = totalH.toFixed(2);
+    };
+
     const renderApp = () => {
       const vista = semanaSelector.value;
       
-      // Guardado en tiempo real
       localStorage.setItem('tt_data', JSON.stringify(historial));
       localStorage.setItem('tt_semanas', JSON.stringify(semanasArchivadas));
       localStorage.setItem('tt_tarifa', tarifa.toString());
@@ -276,7 +288,7 @@
           const pagoDiaBruto = horasNetas * tarifa;
 
           historialLista.innerHTML += `
-            <div class="bg-zinc-900/50 border border-zinc-800/80 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden shadow-sm">
+            <div onclick="editarDia(${index}, flex)" class="bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800/80 p-4 rounded-2xl flex items-center justify-between relative overflow-hidden shadow-sm cursor-pointer transition-colors">
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
               <div class="pl-2">
                 <span class="text-xs font-black text-white capitalize">${fechaFormato}</span>
@@ -286,27 +298,24 @@
                   <span>Break: <strong class="text-zinc-400">${item.descanso}m</strong></span>
                 </div>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3" onclick="event.stopPropagation();">
                 <div class="text-right">
                   <span class="text-sm font-black text-zinc-300 block">$${pagoDiaBruto.toFixed(2)} <span class="text-[9px] text-zinc-600 font-normal">bruto</span></span>
                   <span class="text-[10px] text-zinc-500 font-bold block">${horasNetas.toFixed(2)} hrs</span>
                 </div>
-                ${vista === 'actual' ? `<button onclick="eliminarDia(${index})" class="text-zinc-600 hover:text-rose-400 text-xs active:scale-90 transition-transform px-1 font-bold">✕</button>` : ''}
+                <button onclick="eliminarDia(${index})" class="text-zinc-600 hover:text-rose-400 text-xs active:scale-90 transition-transform px-1 font-bold">✕</button>
               </div>
             </div>
           `;
         });
       }
 
-      // LÓGICA DE NÓMINA MATEMÁTICA CON IMPUESTOS
       const sueldoBrutoTotal = globalHoras * tarifa;
       const retencionImpuestosTotal = sueldoBrutoTotal * (taxPorcentaje / 100);
       
-      // La deducción fija solo se aplica si hay horas laboradas en el tramo
       const deduccionFijaAplicada = sueldoBrutoTotal > 0 ? deducFija : 0;
       const sueldoNetoTotal = Math.max(0, sueldoBrutoTotal - retencionImpuestosTotal - deduccionFijaAplicada);
 
-      // Renderizados numéricos en pantalla
       totalHorasTxt.innerText = `${globalHoras.toFixed(2)}h`;
       totalDineroTxt.innerText = `$${sueldoNetoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       
@@ -322,25 +331,10 @@
       }
     };
 
-    // Escuchadores de entradas de configuración
-    tarifaInput.oninput = (e) => {
-      tarifa = parseFloat(e.target.value) || 0;
-      renderApp();
-    };
-
-    taxPorcentajeInput.oninput = (e) => {
-      taxPorcentaje = parseFloat(e.target.value) || 0;
-      renderApp();
-    };
-
-    deducFijaInput.oninput = (e) => {
-      deducFija = parseFloat(e.target.value) || 0;
-      renderApp();
-    };
-
-    semanaSelector.onchange = () => {
-      renderApp();
-    };
+    tarifaInput.oninput = (e) => { tarifa = parseFloat(e.target.value) || 0; renderApp(); };
+    taxPorcentajeInput.oninput = (e) => { taxPorcentaje = parseFloat(e.target.value) || 0; renderApp(); };
+    deducFijaInput.oninput = (e) => { deducFija = parseFloat(e.target.value) || 0; renderApp(); };
+    semanaSelector.onchange = () => { renderApp(); };
 
     btnGuardar.onclick = () => {
       if (!entradaInput.value || !salidaInput.value) {
@@ -361,10 +355,7 @@
       const originalText = btnGuardar.innerText;
       btnGuardar.innerText = '✅ ¡Guardado en Historial!';
       btnGuardar.style.opacity = '0.7';
-      setTimeout(() => {
-        btnGuardar.innerText = originalText;
-        btnGuardar.style.opacity = '1';
-      }, 1200);
+      setTimeout(() => { btnGuardar.innerText = originalText; btnGuardar.style.opacity = '1'; }, 1200);
 
       renderApp();
     };
@@ -417,9 +408,56 @@
 
     window.eliminarDia = (index) => {
       if (confirm('¿Quieres eliminar este registro del historial?')) {
-        historial.splice(index, 1);
+        const vista = semanaSelector.value;
+        if (vista === 'actual') {
+          historial.splice(index, 1);
+        } else {
+          const idxSem = semanasArchivadas.findIndex(s => s.id == vista);
+          if (idxSem !== -1) {
+            semanasArchivadas[idxSem].datos.splice(index, 1);
+            recalcularTotalesSemanaArchivada(semanasArchivadas[idxSem]);
+            actualizarSelectorSemanas();
+            semanaSelector.value = vista;
+          }
+        }
         renderApp();
       }
+    };
+
+    window.editarDia = (index) => {
+      const vista = semanaSelector.value;
+      let turno;
+      
+      if (vista === 'actual') {
+        turno = historial[index];
+      } else {
+        const sem = semanasArchivadas.find(s => s.id == vista);
+        if (sem) turno = sem.datos[index];
+      }
+
+      if (!turno) return;
+
+      const nuevaEntrada = prompt("Editar Hora de Entrada (HH:MM):", turno.entrada);
+      if (nuevaEntrada === null) return; 
+      const nuevaSalida = prompt("Editar Hora de Salida (HH:MM):", turno.salida);
+      if (nuevaSalida === null) return;
+      const nuevoDescanso = prompt("Editar minutos de Break:", turno.descanso);
+      if (nuevoDescanso === null) return;
+
+      turno.entrada = nuevaEntrada || "00:00";
+      turno.salida = nuevaSalida || "00:00";
+      turno.descanso = parseInt(nuevoDescanso) || 0;
+
+      if (vista !== 'actual') {
+        const idxSem = semanasArchivadas.findIndex(s => s.id == vista);
+        if (idxSem !== -1) {
+          recalcularTotalesSemanaArchivada(semanasArchivadas[idxSem]);
+          actualizarSelectorSemanas();
+          semanaSelector.value = vista;
+        }
+      }
+
+      renderApp();
     };
 
     btnClearAll.onclick = () => {
